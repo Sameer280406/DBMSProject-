@@ -18,7 +18,7 @@ initCronJobs(supabase);
 
 app.post('/api/signup', async (req, res) => {
     try {
-        const { email, password, name, role, roll_no, committee_name, desk_name, desk_order } = req.body;
+        const { email, password, name, role, roll_no, committee_name, desk_name, desk_order, year_of_study, branch, convenor_phone, convenor_email, designation } = req.body;
 
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
             email,
@@ -41,7 +41,11 @@ app.post('/api/signup', async (req, res) => {
                 user_id: userId,
                 roll_no: roll_no || `ROLL-${Math.floor(Math.random() * 1000)}`,
                 committee_name: committee_name || 'General Body',
-                year_of_study: 'FY'
+                year_of_study: year_of_study || 'FY',
+                branch: branch || '',
+                convenor_phone: convenor_phone || '',
+                convenor_email: convenor_email || '',
+                designation: designation || 'Student'
             });
         } else if (role === 'admin') {
             await supabase.from('desks').insert({
@@ -54,6 +58,53 @@ app.post('/api/signup', async (req, res) => {
         res.json({ success: true });
 
     } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/update-profile', async (req, res) => {
+    try {
+        const { user_id, role, name, year_of_study, branch, committee_name, convenor_phone, convenor_email, designation, desk_name } = req.body;
+        
+        if (!user_id) return res.status(400).json({ error: "Missing user_id" });
+
+        // Update profiles for name
+        if (name) {
+            const { error: profileErr } = await supabase
+                .from('profiles')
+                .update({ name })
+                .eq('id', user_id);
+            if (profileErr) throw profileErr;
+        }
+
+        if (role === 'admin') {
+            // Update admin desks table attributes
+            if (desk_name) {
+                const { error: deskErr } = await supabase
+                    .from('desks')
+                    .update({ name: desk_name })
+                    .eq('admin_user_id', user_id);
+                if (deskErr) throw deskErr;
+            }
+        } else {
+            // Update students table attributes
+            const { error: studentErr } = await supabase
+                .from('students')
+                .update({ 
+                    year_of_study, 
+                    branch, 
+                    committee_name, 
+                    convenor_phone, 
+                    convenor_email,
+                    designation
+                })
+                .eq('user_id', user_id);
+                
+            if (studentErr) throw studentErr;
+        }
+
+        res.json({ success: true });
+    } catch(err) {
         res.status(500).json({ error: err.message });
     }
 });

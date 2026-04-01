@@ -28,7 +28,7 @@ export default function ApplicationDetail() {
         .from('applications')
         .select(`
           *,
-          students(roll_no, committee_name, year_of_study, profiles(name, email)),
+          students(roll_no, committee_name, year_of_study, designation, profiles(name, email)),
           event_proposals(*),
           venue_bookings(*),
           permission_letters(*),
@@ -138,11 +138,15 @@ export default function ApplicationDetail() {
 
           <section className="mb-10">
             <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 bg-slate-100 dark:bg-slate-800/50 px-4 py-2 rounded-lg">Applicant Details</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-2">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 px-2 items-center">
               <div><p className="text-xs text-slate-400 font-bold uppercase">Name</p><p className="font-medium text-slate-700 dark:text-slate-300">{app.students.profiles.name}</p></div>
               <div><p className="text-xs text-slate-400 font-bold uppercase">Roll No</p><p className="font-medium text-slate-700 dark:text-slate-300">{app.students.roll_no}</p></div>
               <div><p className="text-xs text-slate-400 font-bold uppercase">Year</p><p className="font-medium text-slate-700 dark:text-slate-300">{app.students.year_of_study}</p></div>
               <div><p className="text-xs text-slate-400 font-bold uppercase">Committee</p><p className="font-medium text-slate-700 dark:text-slate-300">{app.students.committee_name || 'N/A'}</p></div>
+              <div>
+                 <p className="text-xs text-slate-400 font-bold uppercase mb-1">Designation</p>
+                 <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 w-max">{app.students.designation || 'Student'}</span>
+              </div>
             </div>
           </section>
 

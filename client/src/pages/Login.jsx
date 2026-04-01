@@ -13,7 +13,7 @@ export default function Login() {
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', 
     // Student specifics
-    roll_no: '', committee_name: '',
+    roll_no: '', committee_name: '', year_of_study: 'FY', branch: '', convenor_phone: '', convenor_email: '', designation: 'Student',
     // Admin specifics
     desk_name: '', desk_order: ''
   });
@@ -126,14 +126,56 @@ export default function Login() {
             </div>
 
             {isSignUp && role === 'student' && (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Roll No / ID</label>
-                  <input type="text" name="roll_no" value={formData.roll_no} onChange={handleChange} className="input-field py-2" required={isSignUp} />
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Roll No / ID</label>
+                    <input type="text" name="roll_no" value={formData.roll_no} onChange={handleChange} className="input-field py-2" required={isSignUp} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Year of Study</label>
+                    <select name="year_of_study" value={formData.year_of_study} onChange={handleChange} className="input-field py-2" required={isSignUp}>
+                      <option value="FY">First Year (FY)</option>
+                      <option value="SY">Second Year (SY)</option>
+                      <option value="TY">Third Year (TY)</option>
+                      <option value="Final">Final Year</option>
+                    </select>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Committee Name</label>
-                  <input type="text" name="committee_name" value={formData.committee_name} onChange={handleChange} className="input-field py-2" required={isSignUp} />
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Branch</label>
+                    <input type="text" name="branch" value={formData.branch} onChange={handleChange} className="input-field py-2" placeholder="e.g. Computer Science" required={isSignUp} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Committee Name</label>
+                    <input type="text" name="committee_name" value={formData.committee_name} onChange={handleChange} className="input-field py-2" placeholder="e.g. Tech Club" required={isSignUp} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Designation</label>
+                    <select name="designation" value={formData.designation} onChange={handleChange} className="input-field py-2" required={isSignUp}>
+                      <option value="Student">Student</option>
+                      <option value="Coordinator">Coordinator</option>
+                      <option value="General Secretary">General Secretary</option>
+                      <option value="Joint Secretary">Joint Secretary</option>
+                      <option value="President">President</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Convenor Phone</label>
+                    <input type="text" name="convenor_phone" value={formData.convenor_phone} onChange={handleChange} className="input-field py-2" placeholder="Convenor Contact No." />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Convenor Email</label>
+                    <input type="email" name="convenor_email" value={formData.convenor_email} onChange={handleChange} className="input-field py-2" placeholder="Convenor Email ID" />
+                  </div>
                 </div>
               </div>
             )}
