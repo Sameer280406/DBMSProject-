@@ -73,30 +73,46 @@ export default function SignatureCanvas({ applicationId, deskId, onSignatureSave
     try {
       // Export base64
       canvas.toBlob(async (blob) => {
-        const fileName = `${applicationId}/${deskId}.png`;
-        
-        const { error } = await supabase.storage
-          .from('signatures')
-          .upload(fileName, blob, { upsert: true });
+        try {
+          const fileName = `signatures/${applicationId}/${deskId}_${Date.now()}.png`;
           
-        if (error) throw error;
-        
-        // Return the storage path 
-        onSignatureSaved(fileName);
+          const { error } = await supabase.storage
+            .from('signatures')
+            .upload(fileName, blob, { 
+              upsert: true,
+              contentType: 'image/png'
+            });
+            
+          if (error) throw error;
+          
+          // Return the storage path 
+          await onSignatureSaved(fileName);
+        } catch (innerErr) {
+          console.error('Blob handling error:', innerErr);
+          alert('Action failed: ' + (innerErr.message || 'Check connection'));
+        } finally {
+          setIsUploading(false);
+        }
       }, 'image/png');
     } catch (err) {
-      console.error('Error saving signature:', err);
-      alert('Failed to upload signature. Check console.');
-    } finally {
+      console.error('Outer signature error:', err);
+      alert('Failed to process signature.');
       setIsUploading(false);
     }
   };
 
   return (
-    <div className="border border-slate-200 rounded-xl overflow-hidden bg-white mt-4 premium-shadow">
-      <div className="bg-slate-50 border-b border-slate-200 px-4 py-2 flex justify-between items-center text-sm">
-        <span className="font-semibold text-slate-700">Digital Signature Validation</span>
-        <button onClick={clearCanvas} className="text-slate-500 hover:text-red-500 font-semibold flex items-center gap-1">
+    <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900 mt-4 premium-shadow relative">
+      {isUploading && (
+        <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 z-10 flex flex-col items-center justify-center backdrop-blur-[2px]">
+           <div className="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+           <p className="font-bold text-slate-800 dark:text-white animate-pulse">Encrypting & Validating Signature...</p>
+        </div>
+      )}
+
+      <div className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 px-4 py-2.5 flex justify-between items-center text-sm">
+        <span className="font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">Digital Signature Validation</span>
+        <button onClick={clearCanvas} className="text-slate-400 hover:text-red-500 font-bold flex items-center gap-1 transition-colors">
           <RotateCcw size={14} /> Clear
         </button>
       </div>
@@ -110,16 +126,17 @@ export default function SignatureCanvas({ applicationId, deskId, onSignatureSave
         onTouchStart={startDrawing}
         onTouchMove={draw}
         onTouchEnd={stopDrawing}
-        className="w-full bg-slate-50/50 cursor-crosshair touch-none"
+        className="w-full bg-slate-50/30 dark:bg-slate-950/30 cursor-crosshair touch-none"
       />
       
-      <div className="p-4 border-t border-slate-100 flex justify-end">
+      <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
         <button 
           onClick={saveSignature} 
           disabled={isUploading}
-          className="btn-primary flex items-center gap-2 bg-green-600 hover:bg-green-700 focus:ring-green-100 disabled:opacity-50"
+          className="btn-primary flex items-center gap-2 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-green-100 disabled:opacity-50 h-11 px-6 rounded-xl shadow-lg shadow-green-500/20"
         >
-          {isUploading ? 'Uploading...' : <><Save size={16} /> Save & Validate</>}
+          <Save size={18} className="stroke-[2.5]" /> 
+          <span className="font-bold">Save & Validate</span>
         </button>
       </div>
     </div>

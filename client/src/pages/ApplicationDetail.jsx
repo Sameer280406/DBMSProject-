@@ -29,7 +29,7 @@ export default function ApplicationDetail() {
         .select(`
           *,
           students(roll_no, committee_name, year_of_study, designation, profiles(name, email)),
-          event_proposals(*),
+          event_proposals!event_proposals_application_id_fkey(*),
           venue_bookings(*),
           permission_letters(*),
           desks(name, order_index)
@@ -94,8 +94,15 @@ export default function ApplicationDetail() {
       const result = await res.json();
       if (!result.success) throw new Error(result.error);
       
-      toast.success(`Application successfully ${actionType}!`);
-      navigate('/admin');
+      toast.success(`Application successfully ${actionType}!`, {
+        duration: 4000,
+        icon: '🚀'
+      });
+      
+      // Small pause so they see the success before the jump
+      setTimeout(() => {
+        navigate('/admin');
+      }, 1000);
 
     } catch (err) {
       console.error(err);
@@ -126,26 +133,51 @@ export default function ApplicationDetail() {
               <h1 className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight capitalize">{app.type.replace('_', ' ')}</h1>
               <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">Application Reference: <span className="font-mono text-slate-700 dark:text-slate-300">{app.id}</span></p>
             </div>
-            <div className={`px-4 py-2 rounded-full text-sm font-bold border capitalize ${
-              app.status === 'approved' ? 'bg-green-100 text-green-700 border-green-200' :
-              app.status === 'rejected' ? 'bg-red-100 text-red-700 border-red-200' :
-              app.status === 'expired' ? 'bg-slate-100 text-slate-700 border-slate-200' :
-              'bg-blue-100 text-blue-700 border-blue-200'
-            }`}>
-              Status: {app.status.replace('_', ' ')}
+            <div className="flex flex-col items-end gap-3">
+              <div className={`px-4 py-2 rounded-full text-sm font-bold border capitalize ${
+                app.status === 'approved' ? 'bg-green-100 text-green-700 border-green-200' :
+                app.status === 'rejected' ? 'bg-red-100 text-red-700 border-red-200' :
+                app.status === 'returned' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                app.status === 'expired' ? 'bg-slate-100 text-slate-700 border-slate-200' :
+                'bg-blue-100 text-blue-700 border-blue-200'
+              }`}>
+                Status: {app.status.replace('_', ' ')}
+              </div>
+              
+              {!isAdmin && app.status === 'returned' && (
+                <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 mb-8">
+                  <h3 className="text-lg font-bold text-orange-800 mb-2 flex items-center gap-2">
+                    Revision Required
+                  </h3>
+                  <p className="text-orange-700 italic mb-4">
+                    "{logs.find(l => l.action === 'returned')?.remark || 'No feedback provided'}"
+                  </p>
+                  <button 
+                    onClick={() => {
+                      const path = app.type === 'venue_booking' ? `/edit-venue-booking/${id}` : 
+                                  app.type === 'permission_letter' ? `/edit-permission-letter/${id}` : 
+                                  `/edit-proposal/${id}`;
+                      navigate(path);
+                    }}
+                    className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-xl font-bold transition flex items-center gap-2"
+                  >
+                    <Edit2 size={18}/> Edit & Resubmit
+                  </button>
+                </div>
+              )}
             </div>
           </header>
 
           <section className="mb-10">
             <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 bg-slate-100 dark:bg-slate-800/50 px-4 py-2 rounded-lg">Applicant Details</h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 px-2 items-center">
-              <div><p className="text-xs text-slate-400 font-bold uppercase">Name</p><p className="font-medium text-slate-700 dark:text-slate-300">{app.students.profiles.name}</p></div>
-              <div><p className="text-xs text-slate-400 font-bold uppercase">Roll No</p><p className="font-medium text-slate-700 dark:text-slate-300">{app.students.roll_no}</p></div>
-              <div><p className="text-xs text-slate-400 font-bold uppercase">Year</p><p className="font-medium text-slate-700 dark:text-slate-300">{app.students.year_of_study}</p></div>
-              <div><p className="text-xs text-slate-400 font-bold uppercase">Committee</p><p className="font-medium text-slate-700 dark:text-slate-300">{app.students.committee_name || 'N/A'}</p></div>
+              <div><p className="text-xs text-slate-400 font-bold uppercase">Name</p><p className="font-medium text-slate-700 dark:text-slate-300">{app.students?.profiles?.name || 'Unknown'}</p></div>
+              <div><p className="text-xs text-slate-400 font-bold uppercase">Roll No</p><p className="font-medium text-slate-700 dark:text-slate-300">{app.students?.roll_no || 'Unknown'}</p></div>
+              <div><p className="text-xs text-slate-400 font-bold uppercase">Year</p><p className="font-medium text-slate-700 dark:text-slate-300">{app.students?.year_of_study || 'Unknown'}</p></div>
+              <div><p className="text-xs text-slate-400 font-bold uppercase">Committee</p><p className="font-medium text-slate-700 dark:text-slate-300">{app.students?.committee_name || 'N/A'}</p></div>
               <div>
-                 <p className="text-xs text-slate-400 font-bold uppercase mb-1">Designation</p>
-                 <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 w-max">{app.students.designation || 'Student'}</span>
+                 <p className="text-xs text-slate-400 font-bold mb-1 uppercase">Designation</p>
+                 <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 w-max">{app.students?.designation || 'Student'}</span>
               </div>
             </div>
           </section>

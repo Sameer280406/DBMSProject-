@@ -10,6 +10,7 @@ export default function EventProposalForm() {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [venues, setVenues] = useState([]);
   const [formData, setFormData] = useState({
     event_name: '',
     brief: '',
@@ -21,6 +22,18 @@ export default function EventProposalForm() {
     outcome: '',
     estimated_budget: ''
   });
+
+  useEffect(() => {
+    const fetchVenues = async () => {
+        const { data } = await supabase
+            .from('venues')
+            .select('name')
+            .eq('is_active', true)
+            .order('name');
+        if (data) setVenues(data.map(v => v.name));
+    };
+    fetchVenues();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -93,7 +106,21 @@ export default function EventProposalForm() {
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between">
                 <span>Location (Venue)</span> <MapPin size={16} className="text-slate-400"/>
               </label>
-              <input required type="text" name="venue" value={formData.venue} onChange={handleChange} className="input-field" placeholder="E.g. Main Auditorium" />
+              <select 
+                required 
+                name="venue" 
+                value={formData.venue} 
+                onChange={handleChange} 
+                className="input-field"
+              >
+                <option value="">-- Select Venue --</option>
+                {venues.map(v => (
+                  <option key={v} value={v}>{v}</option>
+                ))}
+                {formData.venue && !venues.includes(formData.venue) && (
+                   <option value={formData.venue}>{formData.venue} (Original)</option>
+                )}
+              </select>
             </div>
 
             <div>

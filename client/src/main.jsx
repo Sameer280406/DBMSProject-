@@ -11,9 +11,13 @@ import Login from './pages/Login';
 import StudentDashboard from './pages/StudentDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import EventProposalForm from './pages/forms/EventProposalForm';
+import EditProposal from './pages/EditProposal';
+import EditVenueBooking from './pages/EditVenueBooking';
+import EditPermissionLetter from './pages/EditPermissionLetter';
 import VenueBookingForm from './pages/forms/VenueBookingForm';
 import PermissionLetterForm from './pages/forms/PermissionLetterForm';
 import ApplicationDetail from './pages/ApplicationDetail';
+import ITDashboard from './pages/ITDashboard';
 
 const ProtectedRoute = ({ children, role }) => {
   const { user, profile, loading } = useAuth();
@@ -33,9 +37,26 @@ const AppRoutes = () => {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={
         user ? (
-          profile?.role === 'admin' 
-            ? <Navigate to="/admin" /> 
-            : <Navigate to="/student" />
+          !profile ? (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+               <div className="text-center p-8 glass-card rounded-2xl premium-shadow max-w-sm">
+                  <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Session Syncing...</h2>
+                  <p className="text-slate-500 mb-6 text-sm">We are recovering your pipeline permissions. If this takes too long, your account might have been refreshed by an administrator.</p>
+                  <div className="flex gap-3 justify-center">
+                      <button onClick={() => window.location.reload()} className="btn-primary flex-1 py-2">Reload</button>
+                      <button onClick={async () => {
+                          const { supabase } = await import('./config/supabaseClient');
+                          await supabase.auth.signOut();
+                          window.location.reload();
+                      }} className="px-4 py-2 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-colors">Sign Out</button>
+                  </div>
+               </div>
+             </div>
+            ) : profile.role === 'admin' 
+            ? <Navigate to="/admin" replace /> 
+            : profile.role === 'it_support'
+            ? <Navigate to="/it-support" replace />
+            : <Navigate to="/student" replace />
         ) : <Login />
       } />
       
@@ -44,18 +65,13 @@ const AppRoutes = () => {
           <StudentDashboard />
         </ProtectedRoute>
       } />
-      
-      <Route path="/student/event-proposal" element={
-        <ProtectedRoute role="student">
-          <EventProposalForm />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/student/venue-booking" element={
-        <ProtectedRoute role="student">
-          <VenueBookingForm />
-        </ProtectedRoute>
-      } />
+        <Route path="/student/new-proposal" element={<ProtectedRoute role="student"><EventProposalForm /></ProtectedRoute>} />
+        <Route path="/student/event-proposal" element={<ProtectedRoute role="student"><EventProposalForm /></ProtectedRoute>} />
+        <Route path="/edit-proposal/:id" element={<ProtectedRoute role="student"><EditProposal /></ProtectedRoute>} />
+        <Route path="/edit-venue-booking/:id" element={<ProtectedRoute role="student"><EditVenueBooking /></ProtectedRoute>} />
+        <Route path="/edit-permission-letter/:id" element={<ProtectedRoute role="student"><EditPermissionLetter /></ProtectedRoute>} />
+        <Route path="/student/book-venue" element={<ProtectedRoute role="student"><VenueBookingForm /></ProtectedRoute>} />
+        <Route path="/student/venue-booking" element={<ProtectedRoute role="student"><VenueBookingForm /></ProtectedRoute>} />
 
       <Route path="/student/permission-letter" element={
         <ProtectedRoute role="student">
@@ -66,6 +82,12 @@ const AppRoutes = () => {
       <Route path="/admin" element={
         <ProtectedRoute role="admin">
           <AdminDashboard />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/it-support" element={
+        <ProtectedRoute role="it_support">
+          <ITDashboard />
         </ProtectedRoute>
       } />
 

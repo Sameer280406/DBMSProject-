@@ -11,6 +11,7 @@ export default function VenueBookingForm() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [approvedEvents, setApprovedEvents] = useState([]);
+  const [venues, setVenues] = useState([]);
   const [formData, setFormData] = useState({
     event_proposal_id: '',
     venue: '',
@@ -45,24 +46,34 @@ export default function VenueBookingForm() {
   });
 
   useEffect(() => {
-    // Fetch only Fully Approved event proposals for this student
     if (!profile?.studentDoc?.id) return;
-    const fetchApproved = async () => {
-      const { data, error } = await supabase
+    
+    const fetchData = async () => {
+      // 1. Fetch Approved event proposals
+      const { data: apps, error: aErr } = await supabase
         .from('applications')
-        .select(`
-          id,
-          event_proposals!inner(id, event_name, venue)
-        `)
+        .select(`id, event_proposals!event_proposals_application_id_fkey(id, event_name, venue)`)
         .eq('type', 'event_proposal')
         .eq('status', 'approved')
         .eq('student_id', profile.studentDoc.id);
 
-      if (!error && data) {
-        setApprovedEvents(data.map(app => app.event_proposals[0]));
+      if (!aErr && apps) {
+        setApprovedEvents(apps.flatMap(app => app.event_proposals || []));
+      }
+
+      // 2. Fetch Active Venues from lookup table
+      const { data: vData, error: vErr } = await supabase
+        .from('venues')
+        .select('name')
+        .eq('is_active', true)
+        .order('name');
+      
+      if (!vErr && vData) {
+        setVenues(vData.map(v => v.name));
       }
     };
-    fetchApproved();
+
+    fetchData();
   }, [profile]);
 
   const handleSubmit = async (e) => {
@@ -128,7 +139,21 @@ export default function VenueBookingForm() {
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between">
                 <span>Venue Requested</span> <Map size={16} className="text-slate-400"/>
               </label>
-              <input required type="text" name="venue" value={formData.venue} onChange={handleChange} className="input-field" placeholder="E.g. Main Auditorium" />
+              <select 
+                required 
+                name="venue" 
+                value={formData.venue} 
+                onChange={handleChange} 
+                className="input-field"
+              >
+                <option value="">-- Choose Venue --</option>
+                {venues.map(v => (
+                  <option key={v} value={v}>{v}</option>
+                ))}
+                {formData.venue && !venues.includes(formData.venue) && (
+                   <option value={formData.venue}>{formData.venue} (Original)</option>
+                )}
+              </select>
             </div>
 
             <div>

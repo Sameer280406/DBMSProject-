@@ -46,15 +46,15 @@ export const AuthProvider = ({ children }) => {
           .from('desks')
           .select('id, name, order_index')
           .eq('admin_user_id', userId)
-          .single();
-        setProfile({ ...data, desk });
+          .limit(1);
+        setProfile({ ...data, desk: desk?.[0] || null });
       } else if (data.role === 'student') {
         const { data: studentDoc } = await supabase
             .from('students')
             .select('*')
             .eq('user_id', userId)
-            .single();
-        setProfile({ ...data, studentDoc });
+            .limit(1);
+        setProfile({ ...data, studentDoc: studentDoc?.[0] || null });
       } else {
         setProfile(data);
       }

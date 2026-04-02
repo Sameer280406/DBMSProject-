@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useTheme } from '../context/ThemeContext';
 
+import campusBg from '../assets/campus-bg.png';
+
 export default function Login() {
   const [role, setRole] = useState('student');
   const [isSignUp, setIsSignUp] = useState(false);
@@ -58,31 +60,43 @@ export default function Login() {
   };
 
   const pageVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
-    exit: { opacity: 0, scale: 0.95, transition: { duration: 0.3 } }
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { duration: 0.8, ease: "easeOut" } },
+    exit: { opacity: 0 }
   };
 
   return (
     <motion.div 
       initial="initial" animate="animate" exit="exit" variants={pageVariants}
-      className="min-h-screen flex items-center justify-center p-4 transition-colors"
+      className="min-h-screen flex items-center justify-center p-4 transition-colors relative overflow-hidden"
+      style={{
+        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url(${campusBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
     >
-      <button onClick={toggleTheme} className="absolute top-6 right-6 p-2 rounded-full glass-card hover:bg-slate-200 dark:hover:bg-slate-700 transition">
-        {theme === 'dark' ? <Sun size={20} className="text-brand-400"/> : <Moon size={20} className="text-slate-600"/>}
+      <button onClick={toggleTheme} className="absolute top-6 right-6 p-2 rounded-full glass-card hover:bg-slate-200 dark:hover:bg-white/10 transition z-50 backdrop-blur-md">
+        {theme === 'dark' ? <Sun size={20} className="text-yellow-400"/> : <Moon size={20} className="text-white"/>}
       </button>
 
-      <div className="max-w-md w-full glass-card rounded-2xl p-8 premium-shadow relative overflow-hidden">
-        
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-500 rounded-full blur-3xl opacity-20 pointer-events-none"></div>
-        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500 rounded-full blur-3xl opacity-20 pointer-events-none"></div>
+      <button onClick={() => {
+        setRole('it_support');
+        toast.success("IT Support Mode Active. Enter IT Credentials.");
+      }} className="fixed bottom-6 right-6 p-3 rounded-2xl glass-card hover:bg-slate-200 dark:hover:bg-white/10 transition z-50 backdrop-blur-md flex items-center gap-2 border border-white/20 text-xs font-black uppercase tracking-tighter text-slate-500 dark:text-slate-400">
+        <Shield size={14}/> IT Administration
+      </button>
 
+      <div className="max-w-md w-full glass-card rounded-3xl p-8 premium-shadow relative overflow-hidden backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border border-white/20">
+        
         <div className="relative z-10">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-slate-800 dark:text-white tracking-tight flex justify-center items-center gap-2">
               <span className="text-brand-600 dark:text-brand-400">v</span>CAMPs
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">{isSignUp ? 'Create a secure portal account' : 'Vidyalankar Institute of Technology'}</p>
+            <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">
+                {role === 'it_support' ? 'Unified Tech Control Console' : (isSignUp ? 'Create a secure portal account' : 'Vidyalankar Institute of Technology')}
+            </p>
           </div>
 
           <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl mb-6">
@@ -95,15 +109,24 @@ export default function Login() {
             >
               <CalendarRange size={16} /> Applicant
             </button>
-            <button
-              type="button"
-              onClick={() => setRole('admin')}
-              className={`flex-1 flex justify-center items-center gap-2 py-2.5 text-sm font-semibold rounded-lg transition-all ${
-                role === 'admin' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              <Shield size={16} /> Authority
-            </button>
+            
+            {(role === 'admin' || role === 'student') && !isSignUp && (
+              <button
+                type="button"
+                onClick={() => setRole('admin')}
+                className={`flex-1 flex justify-center items-center gap-2 py-2.5 text-sm font-semibold rounded-lg transition-all ${
+                  role === 'admin' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                }`}
+              >
+                <Shield size={16} /> Authority
+              </button>
+            )}
+
+            {role === 'it_support' && (
+                <div className="flex-1 flex justify-center items-center gap-2 py-2.5 text-sm font-bold rounded-lg bg-slate-600 text-white shadow-sm">
+                   <Shield size={16} /> IT ADMIN
+                </div>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -180,18 +203,6 @@ export default function Login() {
               </div>
             )}
 
-            {isSignUp && role === 'admin' && (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Desk Name</label>
-                  <input type="text" name="desk_name" value={formData.desk_name} onChange={handleChange} className="input-field py-2" placeholder="e.g. Principal" required={isSignUp} />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Desk Order</label>
-                  <input type="number" name="desk_order" value={formData.desk_order} onChange={handleChange} className="input-field py-2" placeholder="e.g. 1" required={isSignUp} />
-                </div>
-              </div>
-            )}
             
             <motion.button 
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
@@ -208,7 +219,11 @@ export default function Login() {
 
           <p className="text-center text-sm font-medium text-slate-500 dark:text-slate-400 mt-6">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{' '}
-            <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="text-brand-600 dark:text-brand-400 hover:text-brand-700 font-bold underline">
+            <button type="button" onClick={() => {
+                const goingToSignUp = !isSignUp;
+                setIsSignUp(goingToSignUp);
+                if (goingToSignUp) setRole('student');
+            }} className="text-brand-600 dark:text-brand-400 hover:text-brand-700 font-bold underline">
               {isSignUp ? 'Login Here' : 'Create one here'}
             </button>
           </p>
