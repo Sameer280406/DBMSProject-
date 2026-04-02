@@ -450,6 +450,5 @@ app.post('/api/admin/purge-user', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`vCAMPs Node Backend is listening on port ${PORT}`);
-});
+// Export for Vercel Serverless
+module.exports = app;

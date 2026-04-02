@@ -81,7 +81,7 @@ export default function StudentDashboard() {
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch('http://localhost:3000/api/delete-application', {
+      const res = await fetch('/api/delete-application', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ application_id: id, student_id: profile.id })
@@ -100,7 +100,7 @@ export default function StudentDashboard() {
     e.preventDefault();
     setUpdateLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/update-profile', {
+      const res = await fetch('/api/update-profile', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ user_id: profile.id, role: 'student', ...profileData })

@@ -71,7 +71,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     setUpdateLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/update-profile', {
+      const res = await fetch('/api/update-profile', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ user_id: profile.id, role: 'admin', ...profileData })

@@ -46,7 +46,7 @@ export default function EventProposalForm() {
 
       // 1. We insert via our custom Node Backend API to trigger the workflow, SLA, and Emails
       // Assuming your Node server is running on localhost:3000
-      const response = await fetch('http://localhost:3000/api/submit', {
+      const response = await fetch('/api/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

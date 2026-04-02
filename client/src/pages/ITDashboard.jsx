@@ -26,7 +26,7 @@ export default function ITDashboard() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/admin/all-users');
+      const response = await fetch('/api/admin/all-users');
       const data = await response.json();
       if (data.success) {
         setUsers(data.users);
@@ -45,7 +45,7 @@ export default function ITDashboard() {
     
     setPurgingId(userId);
     try {
-      const response = await fetch('http://localhost:3000/api/admin/purge-user', {
+      const response = await fetch('/api/admin/purge-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId })

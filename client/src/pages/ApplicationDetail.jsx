@@ -79,7 +79,7 @@ export default function ApplicationDetail() {
 
     setIsProcessing(true);
     try {
-      const res = await fetch('http://localhost:3000/api/desk-action', {
+      const res = await fetch('/api/desk-action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

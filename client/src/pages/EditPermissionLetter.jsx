@@ -75,7 +75,7 @@ export default function EditPermissionLetter() {
     setSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/update-application', {
+      const response = await fetch('/api/update-application', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
